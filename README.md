@@ -86,6 +86,9 @@ Messages sent in private mode are marked 🔒 and show as code for everyone in t
 Server: `PORT` (4545) · `HOST` (127.0.0.1) · `CHAT_DB` (./data/chat.db) · `CHAT_TOKEN` · `TLS_CERT` / `TLS_KEY`
 Client: `CHAT_SERVER` (ws://localhost:4545) · `CHAT_TOKEN` (or `--server`, `--token`, `--name`)
 
+The CLI also reads these from a `.env` file in the current directory or the project root
+(copy `.env.example`). Variables exported in the shell take priority. `.env` is git-ignored, so keep the token there.
+
 ## Layout
 
 - `src/server.js`: HTTP(S) + WebSocket server (the web view will attach here); purges expired messages every minute

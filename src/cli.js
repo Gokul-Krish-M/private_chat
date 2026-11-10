@@ -1,10 +1,24 @@
 #!/usr/bin/env node
 import readline from 'node:readline';
 import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { ChatClient } from './client.js';
 import { disguise, highlight, LANGS } from './disguise.js';
 import { c, stripAnsi } from './colors.js';
 import { deriveKey, newSalt, encrypt, decrypt, makeVerifier, verifyKey } from './crypto.js';
+
+// ---------- .env ----------
+// Load CHAT_SERVER / CHAT_TOKEN from .env in the current directory and the project root.
+// Variables already set in the shell win (loadEnvFile never overrides them).
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+for (const file of new Set([path.resolve('.env'), path.join(PROJECT_ROOT, '.env')])) {
+  try {
+    process.loadEnvFile(file);
+  } catch (err) {
+    if (err.code !== 'ENOENT') console.error(`Could not read ${file}: ${err.message}`);
+  }
+}
 
 // ---------- args ----------
 function parseArgs(argv) {
