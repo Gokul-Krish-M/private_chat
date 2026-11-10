@@ -1,0 +1,20 @@
+{
+  "name": "secret-chat",
+  "version": "0.1.0",
+  "description": "Two-room terminal chat with a private (disguised-as-code) mode. Messages vanish after 24h.",
+  "type": "module",
+  "bin": {
+    "secret-chat": "src/cli.js"
+  },
+  "scripts": {
+    "server": "node --disable-warning=ExperimentalWarning src/server.js",
+    "chat": "node src/cli.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.22.2"
+  }
+}

@@ -1,0 +1,5 @@
+# Caddy obtains and renews the TLS certificate automatically.
+# WebSocket upgrades are proxied with no extra config.
+__DOMAIN__ {
+	reverse_proxy 127.0.0.1:4545
+}
