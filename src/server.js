@@ -138,10 +138,52 @@ const handlers = {
   },
 };
 
+// ---------- web view (static files from ./web) ----------
+const WEB_DIR = path.join(ROOT, 'web');
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+};
+// Allow-list built at startup: only top-level files in web/ with a known type are ever served.
+const WEB_FILES = new Map(
+  (fs.existsSync(WEB_DIR) ? fs.readdirSync(WEB_DIR) : [])
+    .filter((f) => MIME[path.extname(f)])
+    .map((f) => [`/${f}`, path.join(WEB_DIR, f)]),
+);
+const SECURITY_HEADERS = {
+  'content-security-policy':
+    "default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; " +
+    "object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+  'x-content-type-options': 'nosniff',
+  'referrer-policy': 'no-referrer',
+  'x-frame-options': 'DENY',
+  'permissions-policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+  'cache-control': 'no-cache',
+};
+
 function onHttp(req, res) {
-  // Placeholder for the future web view.
-  res.writeHead(200, { 'content-type': 'text/plain' });
-  res.end('secret-chat server is running. Connect with the CLI: npm run chat\n');
+  const { pathname } = new URL(req.url, 'http://localhost');
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.writeHead(405, { allow: 'GET, HEAD' }).end();
+    return;
+  }
+  const file = WEB_FILES.get(pathname === '/' ? '/index.html' : pathname);
+  if (!file) {
+    res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8', ...SECURITY_HEADERS }).end('Not found\n');
+    return;
+  }
+  fs.readFile(file, (err, body) => {
+    if (err) {
+      res.writeHead(500).end();
+      return;
+    }
+    res.writeHead(200, { 'content-type': MIME[path.extname(file)], ...SECURITY_HEADERS });
+    res.end(req.method === 'HEAD' ? undefined : body);
+  });
 }
 
 // TLS is optional here: either set TLS_CERT/TLS_KEY, or (recommended) keep HOST=127.0.0.1

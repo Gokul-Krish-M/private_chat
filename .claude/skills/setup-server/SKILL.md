@@ -100,8 +100,8 @@ then `sudo certbot --nginx -d <domain>`, installing certbot if needed and asking
 Run all of these and report the results:
 
 ```bash
-curl -fsS http://127.0.0.1:4545/                      # local: "secret-chat server is running"
-curl -fsS https://<domain>/                           # through the proxy with a valid certificate
+curl -fsS http://127.0.0.1:4545/ | grep -o "<title>[^<]*"   # local: "<title>Margins · Reading library"
+curl -fsSI https://<domain>/ | grep -i content-security   # through the proxy: valid cert + CSP header
 sudo sh -c 'set -a; . /etc/secret-chat/env; CHAT_SERVER=wss://<domain> node /opt/secret-chat/deploy/check.mjs'
 ```
 
@@ -120,6 +120,9 @@ Keep it short:
   ```bash
   CHAT_SERVER=wss://<domain> CHAT_TOKEN='<token>' npm run chat
   ```
+- The web view is at `https://<domain>/`. It looks like a reading site called "Margins". Sign in with any
+  username, and use the token as the password. The web view must be served over HTTPS, because browsers only
+  allow its encryption on secure pages.
 - Remind them that the token goes to the other chat participant through a private channel, and so does each
   room's passphrase. The server never sees passphrases.
 - Useful commands: `sudo systemctl restart secret-chat`, `sudo journalctl -u secret-chat -f`.

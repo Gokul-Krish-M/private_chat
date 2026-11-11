@@ -13,6 +13,26 @@ npm run server          # terminal 1
 npm run chat            # terminal 2+ (or: node src/cli.js --name alice)
 ```
 
+## Web view
+
+The backend also serves a web client at `/`. It's disguised as a reading site called **Margins**:
+
+| What you see | What it is |
+|---|---|
+| Articles in the middle | Cover content (original, fictional) |
+| **Search box** | Chat input while a collection is open. Otherwise it really searches the article |
+| **Sponsored** ads on the right | Messages. "Promoted" are yours, "Sponsored" are from others |
+| **Collections** in the left sidebar | Rooms. The "access code" is the room passphrase |
+| **Sign in** | Username = your display name, password = `CHAT_TOKEN` |
+| **AdChoices** link / **Esc** key | Private mode: every ad shows fake ad copy. **Click an ad** to reveal it for 8s |
+
+It uses the same end-to-end encryption as the CLI (WebCrypto), so CLI and browser users can chat in the
+same room. Browsers only allow WebCrypto on secure pages, so it works over `https://` or on
+`http://localhost`, but not on plain `http://` to a remote host.
+Your sign-in lasts for the browser tab. Access codes are kept only in memory, so you re-enter them after a reload.
+
+Locally: `npm run server`, then open http://localhost:4545.
+
 ## Hosting the backend on your server
 
 **With Claude Code:** clone the repo on the server, run `claude` in it and type `/setup-server`.
@@ -91,7 +111,8 @@ The CLI also reads these from a `.env` file in the current directory or the proj
 
 ## Layout
 
-- `src/server.js`: HTTP(S) + WebSocket server (the web view will attach here); purges expired messages every minute
+- `src/server.js`: HTTP(S) + WebSocket server; serves `web/` with a strict CSP; purges expired messages every minute
+- `web/`: browser client (`app.js` UI, `crypto.js` WebCrypto twin of `src/crypto.js`, `articles.js` / `ads.js` cover content)
 - `src/db.js`: SQLite schema and queries
 - `src/crypto.js`: end-to-end encryption (WebCrypto-compatible format)
 - `src/client.js`: protocol client (request/response + events)
